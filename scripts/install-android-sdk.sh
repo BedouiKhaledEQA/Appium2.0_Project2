@@ -1,19 +1,19 @@
-#!/bin/bash
+!/bin/bash
 #using shebang with -i to enable interactive mode (auto load .bashrc)
 
 set -e #stop immediately if any error happens
+ANDROID_HOME=/opt/androidsdk
 
-# Install OpenJDK 17
+# Ajouter le répertoire des outils cmdline à votre variable PATH
+export PATH=$ANDROID_HOME/cmdline-tools/bin:$PATH
+
+# Install Open SDK
 sudo apt update
 sudo apt install openjdk-17-jdk -y
-sudo update-java-alternatives --set java-1.17.0-openjdk-amd64
-
-# Install Android SDK
-sudo apt-get install android-sdk
-
-java -version
+sudo update-java-alternatives --set java-17-openjdk-amd64
 
 # Install SDK Manager
+# you can find this file at https://developer.android.com/studio/index.html#downloads - section command line only
 cd ~ && wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
 ANDROID_HOME=/opt/androidsdk
 mkdir -p $ANDROID_HOME
@@ -25,8 +25,8 @@ echo 'export PATH=$SDK/emulator:$SDK/tools:$SDK/tools/bin:$SDK/platform-tools:$P
 source ~/.bashrc
 
 # Install Android Image version 28
-yes | sudo sdkmanager "platform-tools" "platforms;android-28" "emulator"
-yes | sudo sdkmanager "system-images;android-28;google_apis;x86_64"
+yes | sudo sdkmanager "platform-tools" "platforms;android-30" "emulator"
+yes | sudo sdkmanager "system-images;android-30;google_apis;x86_64"
 emulator -version
 
 echo "INSTALL ANDROID SDK DONE!"

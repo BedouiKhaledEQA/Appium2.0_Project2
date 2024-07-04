@@ -1,14 +1,17 @@
 #!/bin/bash
 set -ex
 
-# Install Node.js and Appium
-curl -fsSL https://deb.nodesource.com/setup_17.x | sudo -E bash -
-sudo apt-get install -y nodejs
-sudo npm install -g appium
+# Installation du SDK Android (si ce n'est pas déjà fait)
+# Assurez-vous que les variables d'environnement ANDROID_HOME et PATH sont correctement configurées
+# En supposant que le SDK Android est déjà installé et configuré sur votre système
 
-# Install uiautomator2 driver
-sudo npm install -g appium-uiautomator2-driver
+# Installer Appium et les pilotes Android
+npm install -g appium@2.5.1
+appium driver install uiautomator2
+appium driver install espresso
 
-# Start Appium server
+# Vérifier la version d'Appium installée
 appium -v
+
+# Démarrer le serveur Appium en arrière-plan et rediriger les logs vers un fichier
 appium --log appium.log &>/dev/null &

@@ -1,117 +1,62 @@
-name: Run Android tests in GitHub Runner
+name: CI
 
 on:
   push:
-    branches: [master]
-  workflow_dispatch:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
-  test:
-    runs-on: windows-latest
+  android-emulator-test:
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up environment variables
-        run: |
-          echo "Setting up environment variables"
-          $env:ANDROID_HOME = "C:/Users/runneradmin/Library/Android/sdk"
-          $env:PATH += ";${env:ANDROID_HOME}\emulator"
-          $env:PATH += ";${env:ANDROID_HOME}\platform-tools"
-          $env:PATH += ";${env:ANDROID_HOME}\tools"
-          $env:PATH += ";${env:ANDROID_HOME}\tools\bin"
-          echo "ANDROID_HOME is set to: $env:ANDROID_HOME"
-          echo "PATH is set to: $env:PATH"
-        shell: pwsh
-
-      - name: Set up JDK 17
+      - name: Set up JDK
         uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
-          java-version: 17
+          java-version: '17'  # or your desired Java version
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16.13.0'
+      - name: Install Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
 
-      - name: Install Appium
+      - name: Set up Docker
         run: |
-          npm install -g appium@latest
-          appium -v
-        shell: bash
+          sudo apt-get update
+          sudo apt-get upgrade -y
+          sudo apt-get install -y \
+              apt-transport-https \
+              ca-certificates \
+              curl \
+              software-properties-common
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository \
+              "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+              $(lsb_release -cs) \
+              stable"
+          sudo apt-get update
+          sudo apt-get install -y docker-ce
+          sudo systemctl start docker
+          sudo systemctl enable docker
 
-      - name: Install Appium Doctor
+      - name: Enable KVM
         run: |
-          npm install -g appium-doctor
-          appium-doctor --version
-        shell: bash
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
-      - name: Install UIAutomator2 driver for Appium
+      - name: Run Android Emulator container
         run: |
-          appium driver install uiautomator2@3.0.1
-        shell: bash
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK packages
-        run: |
-          sdkmanager --install 'system-images;android-30;google_apis;x86_64'
-          sdkmanager --install 'platform-tools'
-          sdkmanager --install 'emulator'
-      - name: Accept SDK licenses
-        run: |
-          echo y | sdkmanager --licenses
-      - name: Run Appium Doctor
-        run: |
-          appium-doctor --android
-        shell: bash
-
-      - name: Create AVD
-        run: |
-          echo no | avdmanager create avd -n Pixel_6_API_30 -k "system-images;android-30;google_apis;x86_64" --force
-        timeout-minutes: 10
-
-      - name: List available AVDs
-        run: |
-          avdmanager list avd
-          dir $HOME\.android\avd
-      - name: Start emulator
-        run: |
-          emulator -avd Pixel_6_API_30 -no-audio -no-window &
-          sleep 60
-        env:
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-
-
-
-      - name: Verify emulator is running
-        run: |
-          adb devices
-      - name: Start Appium server
-        run: |
-          appium &
-        shell: bash
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-
-      - name: Verify Appium server is running
-        run: |
-          curl http://127.0.0.1:4723/status
-          if ($?) { Write-Host "Appium server is running" } else { Write-Host "Appium server is not running"; exit 1 }
-        shell: pwsh
+          docker run -d -p 6080:6080 -e EMULATOR_DEVICE="Samsung Galaxy S10" -e WEB_VNC=true --device /dev/kvm --name android-container budtmo/docker-android:emulator_11.0
 
       - name: Run Android Tests
         run: |
-          echo "JAVA_HOME: $env:JAVA_HOME"
-          echo "ANDROID_HOME: $env:ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT: $env:ANDROID_SDK_ROOT"
-          Get-ChildItem
-          echo "Running Maven tests..."
           mvn test -Denv=local
           echo "Maven tests completed."
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
