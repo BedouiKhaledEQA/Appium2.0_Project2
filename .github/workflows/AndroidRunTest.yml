@@ -27,8 +27,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y maven
 
-      - name: Install Appium
+      - name: Install Node.js and Appium
         run: |
+          sudo apt-get install -y nodejs npm
           npm install -g appium
 
       - name: Install Android SDK Platform Tools (adb)
@@ -39,6 +40,7 @@ jobs:
         run: |
           export ANDROID_HOME=$HOME/Android/Sdk
           export PATH=$ANDROID_HOME/platform-tools:$PATH
+        shell: bash
 
       - name: Install UiAutomator2 Driver
         run: |
@@ -50,6 +52,7 @@ jobs:
 
       - name: Wait for Emulator
         run: |
+          adb start-server
           for i in {1..30}; do
             if adb shell getprop sys.boot_completed | grep -m 1 '1'; then
               echo "Emulator is ready!"
@@ -87,5 +90,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v2
         env:
           PERSONAL_TOKEN: ${{ secrets.TOKEN }}
-          PUBLISH_BRANCH: gh-pages
-          PUBLISH_DIR: allure-history
+        with:
+          publish_branch: gh-pages
+          publish_dir: allure-history
