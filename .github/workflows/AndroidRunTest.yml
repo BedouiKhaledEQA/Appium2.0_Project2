@@ -34,6 +34,8 @@ jobs:
           APK_PATH: ./src/main/resources/ApiDemos-debug.apk
         run: |
           echo "Starting test execution for Android ${ANDROID_VERSION}"
+          node --version
+          npm --version
           appium doctor
           appium run android --app ${APK_PATH} --version $ANDROID_VERSION
           echo "Test execution completed"
@@ -43,3 +45,8 @@ jobs:
         with:
           name: test-report-${{ matrix.android-version }}
           path: appium-results/${ANDROID_VERSION}
+
+      - name: Force Node.js version
+        run: |
+          export NODE_VERSION=node20
+          export PATH=$NODE_VERSION:$PATH
