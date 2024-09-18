@@ -41,6 +41,17 @@ jobs:
 
           # Exécuter les tests/
           mvn test -Denv=local
+
+      - name: Generate Allure Report
+        run: |
+          allure-maven-plugin:generate -Dallure.results.directory=allure-results
+
+      - name: Upload Allure Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: allure-report
+          path: allure-results
+
       - name: Get Allure history
         uses: actions/checkout@v2
         continue-on-error: true
