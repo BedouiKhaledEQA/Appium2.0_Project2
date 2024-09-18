@@ -24,23 +24,37 @@ jobs:
 
       - name: Install Maven
         run: |
-          curl -fsSL https://raw.githubusercontent.com/microsoft/vscode-dev-containers/master/devcontainer/vscode-dev-containers-ubuntu-22.04.sh | bash -s -- -c "sudo apt-get update && sudo apt-get install -y maven"
+          sudo apt-get update
+          sudo apt-get install -y maven
+
+      - name: Install Appium
+        run: |
+          npm install -g appium
 
       - name: Run Android Emulator Tests
         run: |
-          docker run -d -p 5554:5554 -e ANDROID_VERSION=11 -e ABIS=x86_64 -e RAM=2048 -e SD_CARD_SIZE=10240 -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANZ```
-          
-          # Attendre que l'émmulateur se lance
-          sleep 60
+          docker run -d -p 6080:6080 -e EMULATOR_DEVICE="Samsung Galaxy S10" -e WEB_VNC=true --device /dev/kvm --name android-container budtmo/docker-android:emulator_11.0
 
-          # Démarrer Appium Server
+          # Wait for the emulator to launch properly
+          for i in {1..30}; do
+            if adb shell getprop sys.boot_completed | grep -m 1 '1'; then
+              echo "Emulator is ready!"
+              break
+            else
+              echo "Waiting for emulator..."
+              sleep 10
+            fi
+          done
+
+          # Start Appium Server
           appium &
 
-          # Attendre que le serveur Appium démarre
+          # Wait for Appium to start
           sleep 10
 
-          # Exécuter les tests/
+          # Run tests with Maven
           mvn test -Denv=local
+
       - name: Get Allure history
         uses: actions/checkout@v2
         continue-on-error: true
@@ -57,7 +71,7 @@ jobs:
           allure_report: allure-report
           allure_history: allure-history
 
-      - name: Deploy report to Github Pages
+      - name: Deploy report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v2
         env:
           PERSONAL_TOKEN: ${{ secrets.TOKEN }}
