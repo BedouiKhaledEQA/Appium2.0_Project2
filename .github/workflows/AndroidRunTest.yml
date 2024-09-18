@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Android Emulator Tests
         run: |
-          docker run -d -p 6080:6080 -e EMULATOR_DEVICE="Samsung Galaxy S10" -e WEB_VNC=true --device /dev/hyper-v --name android-container budtmo/docker-android:emulator_11.0
+          docker run -d -p 5554:5554 -e ANDROID_VERSION=11 -e ABIS=x86_64 -e RAM=2048 -e SD_CARD_SIZE=10240 -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANIM=false -e DEVICENAME=Android_Emulator -e NO_AUDIO=TRUE -e NO_BOOTLOADER=TRUE -e NO_HZ=TRUE -e EMULATOR_OPTIONS=-no-snapshot-save -e USER_DATA=false -e SYSTEM_IMAGE=false -e BOOT_ANZ```
           
           # Attendre que l'émmulateur se lance
           sleep 60
@@ -41,17 +41,6 @@ jobs:
 
           # Exécuter les tests/
           mvn test -Denv=local
-
-      - name: Generate Allure Report
-        run: |
-          allure-maven-plugin:generate -Dallure.results.directory=allure-results
-
-      - name: Upload Allure Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: allure-report
-          path: allure-results
-
       - name: Get Allure history
         uses: actions/checkout@v2
         continue-on-error: true
