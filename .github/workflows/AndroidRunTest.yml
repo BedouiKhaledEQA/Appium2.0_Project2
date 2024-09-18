@@ -36,7 +36,7 @@ jobs:
         run: |
           sudo apt-get install -y android-sdk-platform-tools
 
-      - name: Set up ANDROID_HOME
+      - name: Set up ANDROID_HOME and ADB
         run: |
           export ANDROID_HOME=$HOME/Android/Sdk
           export PATH=$ANDROID_HOME/platform-tools:$PATH
@@ -46,19 +46,23 @@ jobs:
         run: |
           appium driver install uiautomator2
 
-      - name: Start Android Emulator
+      - name: Start Android Emulator in Docker
         run: |
-          docker run -d -p 6080:6080 -e EMULATOR_DEVICE="Samsung Galaxy S10" -e WEB_VNC=true --device /dev/kvm --name android-container budtmo/docker-android:emulator_11.0
+          docker run -d -p 5554:5554 -p 5555:5555 -p 6080:6080 \
+            -e EMULATOR_DEVICE="Samsung Galaxy S10" \
+            -e WEB_VNC=true --device /dev/kvm \
+            --name android-container budtmo/docker-android:emulator_11.0
 
       - name: Wait for Emulator
         run: |
           adb start-server
-          for i in {1..30}; do
-            if adb shell getprop sys.boot_completed | grep -m 1 '1'; then
+          for i in {1..60}; do
+            adb connect localhost:5555
+            if adb devices | grep emulator; then
               echo "Emulator is ready!"
               break
             else
-              echo "Waiting for emulator..."
+              echo "Waiting for emulator to be ready..."
               sleep 10
             fi
           done
