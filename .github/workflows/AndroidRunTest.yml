@@ -1,39 +1,43 @@
-name: Appium Android Tests
+name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ main ]
+    branches:
+      - master
 
 jobs:
-  test-android:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        android-version: [11]
-    steps:
-      - uses: actions/checkout@v3
+  android-emulator-test:
+    runs-on: windows-latest
 
-      - name: Set up Java
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
         uses: actions/setup-java@v2
         with:
+          distribution: 'temurin'
           java-version: '17'
 
-      - name: Install dependencies
+      - name: Install Maven
         run: |
-          mvn dependency:resolve
-          mvn install
+          curl -fsSL https://raw.githubusercontent.com/microsoft/vscode-dev-containers/master/devcontainer/vscode-dev-containers-ubuntu-22.04.sh | bash -s -- -c "sudo apt-get update && sudo apt-get install -y maven"
 
       - name: Run Android Emulator Tests
-        env:
-          ANDROID_VERSION: ${{ matrix.android-version }}
         run: |
-          echo "Starting test execution for Android ${ANDROID_VERSION}"
-          mvn test -Dtest=com.appium2.0_project.TestClassName
+          docker run -d -p 6080:6080 -e EMULATOR_DEVICE="Samsung Galaxy S10" -e WEB_VNC=true --device /dev/hyper-v --name android-container budtmo/docker-android:emulator_11.0
+          
+          # Attendre que l'émmulateur se lance
+          sleep 60
 
-      - name: Upload test report
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-report-${{ matrix.android-version }}
-          path: ./target/surefire-reports
+          # Démarrer Appium Server
+          appium &
+
+          # Attendre que le serveur Appium démarre
+          sleep 10
+
+          # Exécuter les tests
+          mvn test -Denv=local
