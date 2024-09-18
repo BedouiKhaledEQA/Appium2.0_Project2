@@ -13,10 +13,10 @@ jobs:
       matrix:
         android-version: [11]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'adopt'
@@ -38,3 +38,9 @@ jobs:
           appium doctor
           appium run android --app ${APK_PATH} --version $ANDROID_VERSION
           echo "Test execution completed"
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report-${{ matrix.android-version }}
+          path: appium-results/${ANDROID_VERSION}
