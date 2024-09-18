@@ -36,7 +36,7 @@ jobs:
           # Démarrer Appium Server
           appium &
 
-          # Attendre que le serveur Appium démarre
+          # Attendre que le serveur Appium démarre.
           sleep 10
 
           # Exécuter les tests/
