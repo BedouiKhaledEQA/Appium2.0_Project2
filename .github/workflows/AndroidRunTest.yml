@@ -31,11 +31,20 @@ jobs:
         run: |
           npm install -g appium
 
-      - name: Run Android Emulator Tests
+      - name: Install UiAutomator2 Driver
+        run: |
+          appium driver install uiautomator2
+
+      - name: Verify Installed Drivers
+        run: |
+          appium driver list --installed
+
+      - name: Start Android Emulator
         run: |
           docker run -d -p 6080:6080 -e EMULATOR_DEVICE="Samsung Galaxy S10" -e WEB_VNC=true --device /dev/kvm --name android-container budtmo/docker-android:emulator_11.0
 
-          # Wait for the emulator to launch properly
+      - name: Wait for Emulator
+        run: |
           for i in {1..30}; do
             if adb shell getprop sys.boot_completed | grep -m 1 '1'; then
               echo "Emulator is ready!"
@@ -46,13 +55,11 @@ jobs:
             fi
           done
 
-          # Start Appium Server
-          appium &
+      - name: Start Appium Server
+        run: appium &
 
-          # Wait for Appium to start
-          sleep 10
-
-          # Run tests with Maven.
+      - name: Run Android Tests
+        run: |
           mvn test -Denv=local
 
       - name: Get Allure history
