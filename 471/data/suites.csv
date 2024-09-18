@@ -1,0 +1,2 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"broken","Wed Sep 18 14:48:38 GMT 2024","Wed Sep 18 14:48:39 GMT 2024","674","","Run Android Application","","Run android application via ADB","","Run android application via ADB",""
