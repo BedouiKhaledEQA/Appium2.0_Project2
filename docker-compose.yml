@@ -1,0 +1,17 @@
+version: '3'
+services:
+  android-emulator:
+    build: .
+    container_name: android-emulator
+    ports:
+      - "4723:4723"
+      - "5554:5554"
+      - "5555:5555"
+    privileged: true
+    environment:
+      - DEVICE=Pixel_6
+      - ANDROID_EMULATOR_MEMORY=2048
+      - APPIUM=true
+    volumes:
+      - /dev/kvm:/dev/kvm
+      - ./src/main/resources/ApiDemos-debug.apk:/root/apps/ApiDemos-debug.apk

@@ -39,21 +39,21 @@ public class Base {
     }
 
     public static void InitializeDriver(String platformName) throws Exception {
-        URL url = new URL("http://127.0.0.1:6080/");
+        URL url = new URL("http://127.0.0.1:4723/");
 
         String appUrl = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "ApiDemos-debug.apk").toString();
 
         switch (platformName) {
             case "Android":
                 UiAutomator2Options options = new UiAutomator2Options()
-                        .setDeviceName("Samsung Galaxy S10")
-                        .setPlatformVersion("11.0")
+                        .setDeviceName("Pixel 6 API 30")
+                        .setPlatformVersion("11")
                        // .setUdid("emulator-5554")
                         .setAutomationName("UiAutomator2")
                         .setApp(appUrl)
                         .setAppPackage("io.appium.android.apis")
                         .setAppActivity("io.appium.android.apis.ApiDemos")
-                        .setAvd("Samsung_Galaxy_S10")
+                        .setAvd("Pixel_6_API_30")
                         .setAvdLaunchTimeout(Duration.ofMinutes(3)) // Set a reasonable timeout
                         .setUnlockType("pin")
                         .setUnlockKey("")

@@ -1,4 +1,0 @@
-steps\Hooks.class
-steps\runAppSteps.class
-runner\TestRunner.class
-steps\androidGesturesSteps.class
