@@ -2,7 +2,7 @@ name: Appium Android Tests
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -40,7 +40,12 @@ jobs:
           echo "Test execution completed"
 
       - name: Upload test report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-report-${{ matrix.android-version }}
           path: appium-results/${ANDROID_VERSION}
+
+      - name: Force Node.js version
+        run: |
+          export NODE_VERSION=16
+          export PATH=$NODE_VERSION:$PATH
