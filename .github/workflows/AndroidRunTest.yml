@@ -31,17 +31,18 @@ jobs:
         run: |
           npm install -g appium
 
-      - name: Install Android SDK and ADB
+      - name: Install Android SDK Platform Tools (adb)
         run: |
-          sudo apt-get install -y android-sdk adb
+          sudo apt-get install -y android-sdk-platform-tools
+
+      - name: Set up ANDROID_HOME
+        run: |
+          export ANDROID_HOME=$HOME/Android/Sdk
+          export PATH=$ANDROID_HOME/platform-tools:$PATH
 
       - name: Install UiAutomator2 Driver
         run: |
           appium driver install uiautomator2
-
-      - name: Verify Installed Drivers
-        run: |
-          appium driver list --installed
 
       - name: Start Android Emulator
         run: |
