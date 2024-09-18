@@ -1,32 +1,43 @@
-name: Android Tests
+name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ main ]
+    branches:
+      - master
 
 jobs:
-  android_tests:
-    runs-on: ubuntu-latest
+  android-emulator-test:
+    runs-on: windows-latest
+
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v2
         with:
-          node-version: '16'
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Appium
+      - name: Install Maven
         run: |
-          npm install -g appium
-          npm install appium-uiautomator2-driver
+          curl -fsSL https://raw.githubusercontent.com/microsoft/vscode-dev-containers/master/devcontainer/vscode-dev-containers-ubuntu-22.04.sh | bash -s -- -c "sudo apt-get update && sudo apt-get install -y maven"
 
-      - name: Run Appium
-        run: appium --address localhost --port 4723 --use-drivers uiautomator2
+      - name: Run Android Emulator Tests
+        run: |
+          docker run -d -p 6080:6080 -e EMULATOR_DEVICE="Samsung Galaxy S10" -e WEB_VNC=true --device /dev/hyper-v --name android-container budtmo/docker-android:emulator_11.0
+          
+          # Attendre que l'émmulateur se lance
+          sleep 60
 
-      - name: Run tests
-        run: npm test
+          # Démarrer Appium Server
+          appium &
+
+          # Attendre que le serveur Appium démarre
+          sleep 10
+
+          # Exécuter les tests/
+          mvn test -Denv=local
