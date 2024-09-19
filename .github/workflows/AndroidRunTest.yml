@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Étape 1 : Cloner le dépôt
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Étape 2 : Installer Node.js 16
       - name: Installer Node.js 16
@@ -31,9 +31,12 @@ jobs:
           name: genymotion-image
           path: android-emulator
 
-      # Étape 6 : Installer adb
-      - name: Installer adb
-        run: sudo apt-get update && sudo apt-get install -y android-tools-adb
+      # Étape 6 : Installer adb et Java 17
+      - name: Installer adb et Java 17
+        run: |
+          sudo apt-get update && sudo apt-get install -y android-tools-adb
+          wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2Fotn%2Fjava%2Fdownload%2Findex.html%3B secure%3Dfalse%3B HttpOnly%3B SameSite%3DNone%3B Path%3D%2F; oraclelicense=accept-securebackup-cookie" -O jdk-17_linux-x64_bin.rpm http://download.oracle.com/otn-pub/java/jdk/17.0.8+j9/languagesupport/release/jdk-17_linux-x64_bin.rpm
+          sudo rpm -ivh jdk-17_linux-x64_bin.rpm
 
       # Étape 7 : Démarrer l'emulateur Genymotion
       - name: Démarrer l'emulateur Genymotion
@@ -54,7 +57,7 @@ jobs:
 
       # Étape 10 : Générer le rapport Allure
       - name: Générer le rapport Allure
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         continue-on-error: true
         with:
           ref: gh-pages
@@ -72,7 +75,7 @@ jobs:
 
       # Étape 12 : Déployer le rapport sur GitHub Pages
       - name: Déployer le rapport sur GitHub Pages
-        uses: peaceiris/actions-gh-pages@v2
+        uses: peaceiris/actions-gh-pages@v3
         env:
           PERSONAL_TOKEN: ${{ secrets.TOKEN }}
           PUBLISH_BRANCH: gh-pages
