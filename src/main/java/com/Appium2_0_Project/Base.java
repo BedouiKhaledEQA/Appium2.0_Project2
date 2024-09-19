@@ -39,7 +39,7 @@ public class Base {
     }
 
     public static void InitializeDriver(String platformName) throws Exception {
-        URL url = new URL("http://127.0.0.1:4723/session");
+        URL url = new URL("http://127.0.0.1:4723/");
 
         String appUrl = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "ApiDemos-debug.apk").toString();
 
