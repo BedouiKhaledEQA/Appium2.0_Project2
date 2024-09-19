@@ -28,17 +28,31 @@ jobs:
       - name: Install Appium
         run: npm install -g appium@2.0
 
+      - name: Install Android SDK
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip
+          mkdir -p $HOME/android-sdk
+          cd $HOME/android-sdk
+          wget https://dl.google.com/android/repository/commandlinetools-linux-8502050_latest.zip
+          unzip commandlinetools-linux-8502050_latest.zip
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/* cmdline-tools/latest
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+
       - name: Install UiAutomator2 Driver
         run: |
-            appium driver install uiautomator2  
+          appium driver install uiautomator2
 
       - name: Start Genymotion Cloud Emulator
+        id: start_genymotion
         run: |
           curl -H "Authorization: Bearer ${{ secrets.GENYMOTION_API_TOKEN }}" \
             -X POST https://cloud.geny.io/api/v1/devices \
             -d '{"template": "Pixel_6_API_30", "adb": true}' \
             -o device.json
-          export DEVICE_ID=$(jq -r '.id' device.json)
+          echo "DEVICE_ID=$(jq -r '.id' device.json)" >> $GITHUB_ENV
 
       - name: Wait for Genymotion Emulator to boot
         run: |
@@ -57,7 +71,6 @@ jobs:
           curl -H "Authorization: Bearer ${{ secrets.GENYMOTION_API_TOKEN }}" \
             -X DELETE https://cloud.geny.io/api/v1/devices/$DEVICE_ID
 
-      # Génération et déploiement du rapport Allure
       - name: Générer le rapport Allure
         uses: actions/checkout@v2
         continue-on-error: true
