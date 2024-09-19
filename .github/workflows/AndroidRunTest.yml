@@ -28,6 +28,10 @@ jobs:
       - name: Install Appium
         run: npm install -g appium@2.0
 
+      - name: Install UiAutomator2 Driver
+        run: |
+            appium driver install uiautomator2  
+
       - name: Start Genymotion Cloud Emulator
         run: |
           curl -H "Authorization: Bearer ${{ secrets.GENYMOTION_API_TOKEN }}" \
