@@ -40,6 +40,11 @@ jobs:
         run: |
           sleep 60 # Attendre que l'émulateur soit prêt
 
+      - name: Start Appium Server
+        run: |
+          appium > appium.log 2>&1 &
+          sleep 10 # Attendre que le serveur Appium démarre
+
       - name: Run Appium Tests
         run: mvn test
 
