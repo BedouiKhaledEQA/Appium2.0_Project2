@@ -34,20 +34,19 @@ jobs:
         run: npm install -g appium@latest
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v2
-        with:
-          api-level: 30
-          emulator: true
-          platform: android-30
-          arch: x86_64
-
-      - name: Install system images
         run: |
-          yes | sdkmanager --install "system-images;android-30;google_apis;x86_64"
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O cmdline-tools.zip
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+          unzip -q cmdline-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+          mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+          yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --install "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86_64"
 
-      - name: Start AVD
+      - name: Create AVD
         run: |
-          avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --force --abi google_apis/x86_64 --device "pixel"
+          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --force --abi google_apis/x86_64 --device "pixel"
+
+      - name: Start Emulator
+        run: |
           emulator -avd test -no-window -no-audio -gpu swiftshader_indirect &
           adb wait-for-device
           adb shell settings put global window_animation_scale 0.0
@@ -57,6 +56,7 @@ jobs:
 
       - name: Wait for emulator to boot
         run: |
+          adb wait-for-device
           adb shell getprop init.svc.bootanim | grep -m 1 stopped
 
       - name: Install Maven dependencies
@@ -67,6 +67,7 @@ jobs:
 
       - name: Run Appium tests
         run: mvn test
+
 
       # Allure Report integration
       - name: Get Allure history
