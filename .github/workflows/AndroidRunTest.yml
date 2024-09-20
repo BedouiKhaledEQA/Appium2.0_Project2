@@ -46,13 +46,14 @@ jobs:
 
       - name: Start AVD
         run: |
-          avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64"
+          avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --force --abi google_apis/x86_64 --device "pixel"
           emulator -avd test -no-window -no-audio -gpu swiftshader_indirect &
           adb wait-for-device
           adb shell settings put global window_animation_scale 0.0
           adb shell settings put global transition_animation_scale 0.0
           adb shell settings put global animator_duration_scale 0.0
           adb shell input keyevent 82
+    
 
       - name: Wait for emulator to boot
         run: |
