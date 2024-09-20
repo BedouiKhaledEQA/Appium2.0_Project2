@@ -3,7 +3,7 @@ name: Appium Android Tests
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
 
 jobs:
@@ -13,6 +13,10 @@ jobs:
     env:
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
       JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      PATH: /usr/local/lib/android/sdk/emulator:$PATH
+      PATH: /usr/local/lib/android/sdk/tools:$PATH
+      PATH: /usr/local/lib/android/sdk/tools/bin:$PATH
+      PATH: /usr/local/lib/android/sdk/platform-tools:$PATH
 
     steps:
       - name: Checkout repository
@@ -53,7 +57,6 @@ jobs:
           adb shell settings put global transition_animation_scale 0.0
           adb shell settings put global animator_duration_scale 0.0
           adb shell input keyevent 82
-    
 
       - name: Wait for emulator to boot
         run: |
