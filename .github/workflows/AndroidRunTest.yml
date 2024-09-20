@@ -40,6 +40,10 @@ jobs:
           platform: android-30
           arch: x86_64
 
+      - name: Install system images
+        run: |
+          yes | sdkmanager --install "system-images;android-30;google_apis;x86_64"
+
       - name: Start AVD
         run: |
           avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64"
