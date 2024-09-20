@@ -10,6 +10,11 @@ jobs:
   test:
     runs-on: ubuntu-20.04  # Utilisation d'une version spécifique
 
+    env:
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      PATH: $ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -30,10 +35,62 @@ jobs:
 
       - name: Set up Android SDK
         run: |
+          mkdir -p $ANDROID_SDK_ROOT
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O cmdline-tools.zip
-          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
           unzip -q cmdline-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
           mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-          yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --install "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86_64"
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --install "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86_64"
 
-      # Ajoutez ici d'autres étapes pour créer l'AVD, démarrer l'émulateur, etc.
+      - name: Create AVD
+        run: |
+          echo "no" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --force --abi google_apis/x86_64 --device "pixel"
+
+      - name: Start Emulator
+        run: |
+          $ANDROID_SDK_ROOT/emulator/emulator -avd test -no-window -no-audio -gpu swiftshader_indirect &
+          adb wait-for-device
+          adb shell settings put global window_animation_scale 0.0
+          adb shell settings put global transition_animation_scale 0.0
+          adb shell settings put global animator_duration_scale 0.0
+          adb shell input keyevent 82
+
+      - name: Wait for emulator to boot
+        run: |
+          adb wait-for-device
+          adb shell getprop init.svc.bootanim | grep -m 1 stopped
+
+      - name: Install Maven dependencies
+        run: mvn install -DskipTests
+
+      - name: Start Appium Server
+        run: appium &
+
+      - name: Run Appium tests
+        run: mvn test
+
+
+
+      # Allure Report integration
+      - name: Get Allure history
+        uses: actions/checkout@v2
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Allure Report action from marketplace
+        uses: simple-elf/allure-report-action@master
+        id: allure-report
+        with:
+          allure_results: allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+
+      - name: Deploy report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v2
+        env:
+          PERSONAL_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          publish_branch: gh-pages
+          publish_dir: allure-report
