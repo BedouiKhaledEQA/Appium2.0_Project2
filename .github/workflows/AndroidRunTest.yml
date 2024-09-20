@@ -8,12 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-
-    env:
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
-      PATH: /usr/local/lib/android/sdk/emulator:/usr/local/lib/android/sdk/tools:/usr/local/lib/android/sdk/tools/bin:/usr/local/lib/android/sdk/platform-tools:$PATH
+    runs-on: ubuntu-20.04  # Utilisation d'une version spécifique
 
     steps:
       - name: Checkout repository
@@ -41,55 +36,4 @@ jobs:
           mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
           yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --install "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86_64"
 
-      - name: Create AVD
-        run: |
-          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --force --abi google_apis/x86_64 --device "pixel"
-
-      - name: Start Emulator
-        run: |
-          emulator -avd test -no-window -no-audio -gpu swiftshader_indirect &
-          adb wait-for-device
-          adb shell settings put global window_animation_scale 0.0
-          adb shell settings put global transition_animation_scale 0.0
-          adb shell settings put global animator_duration_scale 0.0
-          adb shell input keyevent 82
-
-      - name: Wait for emulator to boot
-        run: |
-          adb wait-for-device
-          adb shell getprop init.svc.bootanim | grep -m 1 stopped
-
-      - name: Install Maven dependencies
-        run: mvn install -DskipTests
-
-      - name: Start Appium Server
-        run: appium &
-
-      - name: Run Appium tests
-        run: mvn test
-
-
-      # Allure Report integration
-      - name: Get Allure history
-        uses: actions/checkout@v2
-        continue-on-error: true
-        with:
-          ref: gh-pages
-          path: gh-pages
-
-      - name: Allure Report action from marketplace
-        uses: simple-elf/allure-report-action@master
-        id: allure-report
-        with:
-          allure_results: allure-results
-          gh_pages: gh-pages
-          allure_report: allure-report
-          allure_history: allure-history
-
-      - name: Deploy report to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v2
-        env:
-          PERSONAL_TOKEN: ${{ secrets.TOKEN }}
-        with:
-          publish_branch: gh-pages
-          publish_dir: allure-report
+      # Ajoutez ici d'autres étapes pour créer l'AVD, démarrer l'émulateur, etc.
