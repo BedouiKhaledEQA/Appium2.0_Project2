@@ -1,8 +1,12 @@
 #!/bin/bash
 
-# Export Android SDK paths
-export ANDROID_SDK_ROOT="C:\Users\KhaledBEDOUI\AppData\Local\Android\Sdk"
+# Exporter le chemin d'Appium
+export PATH="$PATH:C:/Users/KhaledBEDOUI/AppData/Roaming/npm"
+
+# Exporter les chemins du SDK Android
+export ANDROID_SDK_ROOT="C:/Users/KhaledBEDOUI/AppData/Local/Android/Sdk"
 export PATH="$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$PATH"
+
 # Démarrer l'émulateur (modifiez le nom selon celui de votre AVD)
 emulator -avd "Pixel_6" -no-snapshot-load -wipe-data &
 
