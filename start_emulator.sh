@@ -10,13 +10,26 @@ emulator -avd "Pixel_6" -no-snapshot-load -no-boot-anim -wipe-data &
 # Attendre que l'émulateur soit complètement démarré
 echo "Démarrage de l'émulateur..."
 adb wait-for-device
+
+# Vérification supplémentaire pour s'assurer que l'émulateur est en ligne
+echo "Vérification de l'état de l'émulateur..."
+for i in {1..10}; do
+    if adb shell getprop sys.boot_completed | grep -m 1 "1"; then
+        echo "L'émulateur est complètement prêt."
+        break
+    else
+        echo "L'émulateur n'est pas encore prêt, attente de 10 secondes..."
+        sleep 10
+    fi
+done
+
 adb shell input keyevent 82
-echo "L'émulateur est prêt."
 
 # Démarrer Appium
 appium &
 
 # Attendre quelques secondes pour s'assurer qu'Appium est démarré
-sleep 10
+echo "Attendre qu'Appium soit prêt..."
+sleep 20  # Attendre 20 secondes
 
 echo "Appium est prêt."
