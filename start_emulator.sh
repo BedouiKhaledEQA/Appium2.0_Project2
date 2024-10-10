@@ -7,11 +7,19 @@ export PATH=$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$
 # Démarrer l'émulateur (modifiez le nom selon celui de votre AVD)
 emulator -avd "Pixel_6" -no-snapshot-load -no-boot-anim -wipe-data &
 
-# Attendre que l'émulateur soit complètement démarré (10 secondes pour s'assurer)
+# Attendre que l'émulateur soit complètement démarré
 echo "Démarrage de l'émulateur..."
 adb wait-for-device
-adb shell input keyevent 82
-echo "L'émulateur est prêt."
+
+# Vous pouvez ajouter une vérification supplémentaire pour vous assurer que l'émulateur est prêt
+# Vérifier que le démarrage est complet
+adb shell getprop sys.boot_completed | grep -m 1 '1'
+if [ $? -eq 0 ]; then
+    echo "L'émulateur est prêt."
+else
+    echo "L'émulateur n'a pas démarré correctement."
+    exit 1
+fi
 
 # Démarrer Appium (assurez-vous que Appium est installé globalement ou spécifiez le chemin)
 appium &
