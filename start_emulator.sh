@@ -1,28 +1,24 @@
 #!/bin/bash
 
-# Exporter le chemin d'Appium
-export PATH="$PATH:C:/Users/KhaledBEDOUI/AppData/Roaming/npm"
+echo "Démarrage du script..."
 
-# Exporter les chemins du SDK Android
-export ANDROID_SDK_ROOT="C:/Users/KhaledBEDOUI/AppData/Local/Android/Sdk"
-export PATH="$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$PATH"
+# Export Android SDK paths
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$PATH
 
-# Démarrer l'émulateur (modifiez le nom selon celui de votre AVD)
-if ! emulator -avd "Pixel_6" -no-snapshot-load -wipe-data &; then
-    echo "Échec du démarrage de l'émulateur."
-    exit 1
-fi
+echo "Lancement de l'émulateur..."
+# Démarrer l'émulateur
+emulator -avd "Pixel_6" -no-snapshot-load -no-boot-anim -wipe-data &
 
-# Attendre que l'émulateur soit complètement démarré
-echo "Démarrage de l'émulateur..."
+echo "Attente que l'émulateur soit prêt..."
 adb wait-for-device
 adb shell input keyevent 82
 echo "L'émulateur est prêt."
 
-# Démarrer Appium et afficher les logs dans la console
+# Démarrer Appium
 echo "Démarrage d'Appium..."
-nohup appium --log-level info & # Utiliser nohup si nécessaire
-echo "Appium est prêt."
+appium &
 
-# Attendre que l'émulateur et Appium soient prêts
+# Attendre quelques secondes pour s'assurer qu'Appium est démarré
 sleep 10
+echo "Appium est prêt."
