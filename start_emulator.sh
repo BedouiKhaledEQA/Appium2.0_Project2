@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # Export Android SDK paths
-export ANDROID_HOME=$HOME/Android/Sdk
-export PATH=$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$PATH
-
+export ANDROID_SDK_ROOT="C:\Users\KhaledBEDOUI\AppData\Local\Android\Sdk"
+export PATH="$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$PATH"
 # Démarrer l'émulateur (modifiez le nom selon celui de votre AVD)
 emulator -avd "Pixel_6" -no-snapshot-load -wipe-data &
 
