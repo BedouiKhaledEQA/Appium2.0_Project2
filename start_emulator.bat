@@ -17,10 +17,18 @@ adb wait-for-device
 adb shell input keyevent 82
 echo "L'émulateur est prêt."
 
+rem Vérifier l'état de l'émulateur
+for /f %%i in ('adb get-state') do set state=%%i
+if "%state%" NEQ "device" (
+    echo "Erreur : L'émulateur n'est pas prêt."
+    exit /b
+)
+
 rem Démarrer Appium et afficher les logs dans la console
 echo "Démarrage d'Appium..."
 start cmd /k appium --log-level info
 echo "Appium est prêt."
 
-rem Attendre quelques secondes pour s'assurer qu'Appium est démarré
-timeout /t 10
+rem Attendre que l'utilisateur ferme la fenêtre Appium
+echo "Appuyez sur une touche pour quitter..."
+pause > nul
