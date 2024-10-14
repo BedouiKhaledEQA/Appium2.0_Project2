@@ -15,12 +15,13 @@ rem Attendre que l'émulateur soit complètement démarré
 echo Attente de l'émulateur...
 adb wait-for-device
 adb shell input keyevent 82
-echo "L'émulateur est prêt."
+echo L'émulateur est prêt.
 
 rem Démarrer Appium et afficher les logs dans la console
-echo "Démarrage d'Appium..."
-start cmd /k appium --log-level info
-echo "Appium est prêt."
+echo Démarrage d'Appium...
+cmd /c appium --log-level info
+
+echo Appium est prêt.
 
 rem Attendre quelques secondes pour s'assurer qu'Appium est démarré
 timeout /t 10
