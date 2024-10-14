@@ -1,26 +1,26 @@
-#!/bin/bash
+@echo off
 
-# Exporter les chemins du SDK Android
-export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
-export PATH="$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$PATH"
+rem Exporter le chemin d'Appium
+set PATH=%PATH%;C:\Users\KhaledBEDOUI\AppData\Roaming\npm
 
-# Démarrer l'émulateur (modifiez le nom selon celui de votre AVD)
-echo "Démarrage de l'émulateur..."
-$ANDROID_SDK_ROOT/emulator/emulator -avd "Pixel_6" -no-snapshot-load -wipe-data &
+rem Exporter les chemins du SDK Android
+set ANDROID_SDK_ROOT=C:\Users\KhaledBEDOUI\AppData\Local\Android\Sdk
+set PATH=%ANDROID_SDK_ROOT%\emulator;%ANDROID_SDK_ROOT%\platform-tools;%PATH%
 
-# Attendre que l'émulateur soit complètement démarré
-echo "Attente de l'émulateur..."
+rem Démarrer l'émulateur (modifiez le nom selon celui de votre AVD)
+echo Démarrage de l'émulateur...
+start "" "%ANDROID_SDK_ROOT%\emulator\emulator" -avd "Pixel_6" -no-snapshot-load -wipe-data
+
+rem Attendre que l'émulateur soit complètement démarré
+echo Attente de l'émulateur...
 adb wait-for-device
-
-# Envoyer une touche pour déverrouiller l'émulateur
 adb shell input keyevent 82
 echo "L'émulateur est prêt."
 
-# Démarrer Appium et afficher les logs dans la console
+rem Démarrer Appium et afficher les logs dans la console
 echo "Démarrage d'Appium..."
-appium --log-level info &
+start cmd /k appium --log-level info
 echo "Appium est prêt."
 
-# Attendre que l'utilisateur ferme le terminal
-echo "Appuyez sur Ctrl+C pour quitter..."
-wait
+rem Attendre quelques secondes pour s'assurer qu'Appium est démarré
+timeout /t 10
