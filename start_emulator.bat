@@ -9,7 +9,7 @@ set PATH=%ANDROID_HOME%\emulator;%ANDROID_HOME%\platform-tools;%PATH%
 
 rem Démarrer l'émulateur (modifiez le nom selon celui de votre AVD)
 echo Démarrage de l'émulateur...
-start "" "%ANDROID_HOME%\emulator\emulator" -avd "Pixel_6" -no-snapshot-load -wipe-data
+start "" "%ANDROID_HOME%\emulator\emulator.exe" -avd "Pixel_6" -no-snapshot-load -wipe-data
 
 rem Attendre que l'émulateur soit complètement démarré
 echo Attente de l'émulateur...
