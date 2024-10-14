@@ -5,7 +5,7 @@ export ANDROID_HOME=$HOME/Android/Sdk
 export PATH=$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$PATH
 
 # Démarrer l'émulateur (modifiez le nom selon celui de votre AVD)
-emulator -avd "Pixel_6_API_30" -no-snapshot-load -no-boot-anim -wipe-data &
+emulator -avd "Pixel_6" -no-snapshot-load -no-boot-anim -wipe-data &
 
 # Attendre que l'émulateur soit complètement démarré (10 secondes pour s'assurer)
 echo "Démarrage de l'émulateur..."
