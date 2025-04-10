@@ -1,77 +1,96 @@
-name: CI
+name: Appium Android Tests
 
 on:
   push:
     branches:
       - master
   pull_request:
-    branches:
-      - master
 
 jobs:
-  android-emulator-test:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-20.04  # Utilisation d'une version spécifique
+
+    env:
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      PATH: $ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up JDK
-        uses: actions/setup-java@v2
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: 'adopt'
           java-version: '17'
 
-      - name: Install Maven
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Appium
+        run: npm install -g appium@latest
+
+      - name: Set up Android SDK
         run: |
-          sudo apt-get update
-          sudo apt-get install -y maven
+          mkdir -p $ANDROID_SDK_ROOT
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -O cmdline-tools.zip
+          unzip -q cmdline-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+          mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --install "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86_64"
 
-      - name: Set up Docker
+      - name: Create AVD
         run: |
-          sudo apt-get update
-          sudo apt-get upgrade -y
-          sudo apt-get install -y \
-              apt-transport-https \
-              ca-certificates \
-              curl \
-              software-properties-common
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-          sudo add-apt-repository \
-              "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-              $(lsb_release -cs) \
-              stable"
-          sudo apt-get update
-          sudo apt-get install -y docker-ce
-          sudo usermod -aG docker $USER
-          newgrp docker
+          echo "no" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --force --abi google_apis/x86_64 --device "pixel"
 
-    
-
-      - name: Install Node.js and Appium
+      - name: Start Emulator
         run: |
-          curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-          sudo apt-get install -y nodejs
-          npm install -g appium
+          $ANDROID_SDK_ROOT/emulator/emulator -avd test -no-window -no-audio -gpu swiftshader_indirect &
+          adb wait-for-device
+          adb shell settings put global window_animation_scale 0.0
+          adb shell settings put global transition_animation_scale 0.0
+          adb shell settings put global animator_duration_scale 0.0
+          adb shell input keyevent 82
 
-      - name: Run Android Emulator container
+      - name: Wait for emulator to boot
         run: |
-          docker run -d -p 6080:6080 -e EMULATOR_DEVICE="Samsung Galaxy S10" -e WEB_VNC=true --device /dev/kvm --name android-container budtmo/docker-android:emulator_11.0
+          adb wait-for-device
+          adb shell getprop init.svc.bootanim | grep -m 1 stopped
 
-      - name: Wait for emulator to start
-        run: |
-          echo "Waiting for Android Emulator to start..."
-          sleep 60 # Adjust this sleep duration based on how long the emulator takes to start
+      - name: Install Maven dependencies
+        run: mvn install -DskipTests
 
-      - name: Run Appium Server
+      - name: Start Appium Server
         run: appium &
 
-      - name: Wait for Appium Server to start
-        run: |
-          echo "Waiting for Appium Server to start....."
-          sleep 10 # Adjust this sleep duration based on how long the server takes to start
+      - name: Run Appium tests
+        run: mvn test
 
-      - name: Run Android Tests
-        run: |
-          mvn test -Denv=local
-          echo "Maven tests completed."
+
+
+      # Allure Report integration
+      - name: Get Allure history
+        uses: actions/checkout@v2
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Allure Report action from marketplace
+        uses: simple-elf/allure-report-action@master
+        id: allure-report
+        with:
+          allure_results: allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+
+      - name: Deploy report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v2
+        env:
+          PERSONAL_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          publish_branch: gh-pages
+          publish_dir: allure-report
