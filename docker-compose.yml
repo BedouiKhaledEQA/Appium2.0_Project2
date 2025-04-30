@@ -1,13 +1,15 @@
+version: '3.8'
+
 services:
   android:
-    image: budtmo/docker-android-x86-8.1
+    image: budtmo/docker-android:emulator_11.0
     privileged: true
     ports:
       - "5554:5554"
       - "5555:5555"
       - "4723:4723"
     environment:
-      - DEVICE=Pixel_6_API_30
+      - DEVICE=Samsung Galaxy S10
       - APPIUM=true
     volumes:
       - /dev/bus/usb:/dev/bus/usb
