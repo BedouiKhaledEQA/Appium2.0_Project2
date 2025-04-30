@@ -1,17 +1,29 @@
-version: '3'
+version: '3.8'
+
 services:
-  android-emulator:
-    build: .
-    container_name: android-emulator
+  android:
+    image: budtmo/docker-android-x86-11.0
+    privileged: true
     ports:
-      - "4723:4723"
       - "5554:5554"
       - "5555:5555"
-    privileged: true
+      - "4723:4723"
     environment:
-      - DEVICE=Pixel_6
-      - ANDROID_EMULATOR_MEMORY=2048
+      - DEVICE=Pixel_6_API_30
       - APPIUM=true
     volumes:
-      - /dev/kvm:/dev/kvm
-      - ./src/main/resources/ApiDemos-debug.apk:/root/apps/ApiDemos-debug.apk
+      - /dev/bus/usb:/dev/bus/usb
+    healthcheck:
+      test: adb devices
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - android
+    environment:
+      - APPIUM_SERVER=http://android:4723
