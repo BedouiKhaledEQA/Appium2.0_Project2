@@ -28,7 +28,7 @@ jobs:
           echo "📱 État de l'émulateur :"
           docker-compose exec android adb devices || true
           echo "🌐 Statut Appium :"
-          curl http://localhost:4723/wd/hub/status || echo "Appium ne répond pas"
+          curl http://localhost:4723/status || echo "Appium ne répond pas"
 
       - name: Check Appium container logs
         run: |

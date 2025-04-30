@@ -47,7 +47,7 @@ public class Base {
             case "Android":
                 UiAutomator2Options options = new UiAutomator2Options()
                         .setDeviceName("Samsung Galaxy S10")
-                        .setPlatformVersion("10")
+                        .setPlatformVersion("11")
                        // .setUdid("emulator-5554")
                         .setAutomationName("UiAutomator2")
                         .setApp(appUrl)
