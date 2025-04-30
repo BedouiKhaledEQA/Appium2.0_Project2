@@ -1,36 +1,38 @@
-name: Run Appium Android Tests
+name: Run Appium Tests
 
 on:
   push:
     branches:
       - master
-  pull_request:
-    branches:
-      - master
 
 jobs:
-  android-tests:
+  appium-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+
+    services:
+      docker:
+        image: docker:19.03.12
+        options: --privileged
+        ports:
+          - 5554:5554
+          - 5555:5555
+          - 4723:4723
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: Install Docker Compose
+      - name: Set up Docker Compose
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Run Docker Compose
+        run: docker-compose up -d
 
-      - name: Build and Run Docker Containers
+      - name: Wait for emulator to be ready
         run: |
-          docker-compose up -d
-          echo "Attente de l'émulateur..."
-          sleep 90
-          docker ps
+          sleep 60  # Ajuste ce délai si nécessaire pour t'assurer que l'émulateur est prêt
 
       - name: Run Appium Tests
-        run: docker-compose logs tests
+        run: docker-compose logs tests  # Regarde les logs de l'exécution des tests

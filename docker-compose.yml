@@ -18,3 +18,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+
+  tests:
+    image: maven:3.9.5-openjdk-17
+    container_name: appium-tests
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    depends_on:
+      - android
+    entrypoint: ["mvn", "test", "-Denv=local"]
