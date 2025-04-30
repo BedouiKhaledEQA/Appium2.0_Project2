@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   android:
-    image: budtmo/docker-android-x86-11.0
+    image: budtmo/docker-android-x86-8.1
     privileged: true
     ports:
       - "5554:5554"
@@ -18,12 +16,3 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-
-  tests:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    depends_on:
-      - android
-    environment:
-      - APPIUM_SERVER=http://android:4723
