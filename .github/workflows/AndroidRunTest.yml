@@ -9,15 +9,6 @@ jobs:
   appium-tests:
     runs-on: ubuntu-latest
 
-    services:
-      docker:
-        image: docker:19.03.12
-        options: --privileged
-        ports:
-          - 5554:5554
-          - 5555:5555
-          - 4723:4723
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -30,9 +21,21 @@ jobs:
       - name: Run Docker Compose
         run: docker-compose up -d
 
-      - name: Wait for emulator to be ready
+      - name: Wait for emulator and Appium to be ready
         run: |
-          sleep 60  # Ajuste ce délai si nécessaire pour t'assurer que l'émulateur est prêt
+          echo "⏳ Attente du démarrage de l'émulateur et d'Appium..."
+          sleep 60
+          echo "📱 État de l'émulateur :"
+          docker-compose exec android adb devices || true
+          echo "🌐 Statut Appium :"
+          curl http://localhost:4723/wd/hub/status || echo "Appium ne répond pas"
+
+      - name: Check Appium container logs
+        run: |
+          echo "📄 Logs Appium (android) :"
+          docker-compose logs android
 
       - name: Run Appium Tests
-        run: docker-compose logs tests  # Regarde les logs de l'exécution des tests
+        run: |
+          echo "🚀 Démarrage des tests Appium..."
+          docker-compose logs tests
