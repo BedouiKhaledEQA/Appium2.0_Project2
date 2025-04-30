@@ -18,13 +18,15 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    # Ajout d'un delay pour s'assurer qu'Appium est prêt avant de démarrer les tests
+    command: ["sh", "-c", "sleep 60 && /opt/android/platform-tools/adb -s emulator-5554 shell input keyevent 82 && /opt/android/platform-tools/adb devices"]
 
   tests:
-    image: maven:3.8.4-openjdk-17  # Remplacer par une image disponible
+    image: maven:3.8.4-openjdk-17
     container_name: appium-tests
     working_dir: /workspace
     volumes:
       - .:/workspace
     depends_on:
       - android
-    entrypoint: ["mvn", "test", "-Denv=local"]
+    entrypoint: ["sh", "-c", "while ! curl -s http://android:4723/status; do echo 'Waiting for Appium...'; sleep 5; done; mvn test -Denv=local"]
