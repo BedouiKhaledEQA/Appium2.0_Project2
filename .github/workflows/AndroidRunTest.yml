@@ -19,19 +19,19 @@ jobs:
           sudo apt-get install -y docker-compose
 
       - name: Run Docker Compose
-        run: docker-compose up -d
+        run: |
+          docker-compose up -d
+          docker-compose logs -f # Affiche les logs en temps réel pour déboguer
 
       - name: Wait for emulator and Appium to be ready
         run: |
           echo "⏳ Attente du démarrage de l'émulateur et d'Appium..."
-          # Attente de 60 secondes pour laisser l'émulateur et Appium démarrer
-          sleep 60
-          
-          # Vérifier l'état de l'émulateur
+          while ! curl -s http://localhost:4723/status; do
+            echo "Appium n'est pas encore prêt, attente..."
+            sleep 5
+          done
           echo "📱 État de l'émulateur :"
-          docker-compose exec android adb devices || echo "Émulateur non trouvé"
-          
-          # Vérifier l'état d'Appium
+          docker-compose exec android adb devices || true
           echo "🌐 Statut Appium :"
           curl http://localhost:4723/status || echo "Appium ne répond pas"
 
@@ -43,9 +43,5 @@ jobs:
       - name: Run Appium Tests
         run: |
           echo "🚀 Démarrage des tests Appium..."
-          docker-compose exec tests mvn test -Denv=local
-
-      - name: Check test logs
-        run: |
-          echo "📄 Logs des tests :"
           docker-compose logs tests
+          docker-compose exec tests mvn test -Denv=local
